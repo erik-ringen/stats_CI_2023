@@ -95,7 +95,7 @@ CI_width <- function(toss_sim, n_toss){
 # A function to give the precision for a given sample size
 sample_size_precision <- function(n_toss){
     # simulate from the prior predictive distribution
-    toss_sims <- rbinom(100, size = n_toss, prob = prior_samp)
+    toss_sims <- rbinom(500, size = n_toss, prob = prior_samp)
     CIs <- CI_width(toss_sim = toss_sims, n_toss = n_toss)
     interval_width <- max(CIs) # worst case scenario for precision
     
@@ -106,11 +106,16 @@ sample_size_precision <- function(n_toss){
 sample_size_precision <- Vectorize(sample_size_precision)
 CI_width <- Vectorize(CI_width) 
 
-sample_size <- seq(from = 1, to = 3000, by = 10) # sample sizes to consider
+sample_size <- seq(from = 10, to = 3000, by = 10) # sample sizes to consider
 
 precision <- sample_size_precision(n_toss = sample_size)
 
 plot(precision ~ sample_size, type = "l", lwd = 3)
 abline(h = 0.05, lty = "dashed")
 
-sample_size[precision < 0.05][1]
+needed_sample <- sample_size[precision < 0.05][2] # increase size by one step to accoutn for sim variance
+needed_sample
+
+# Validate this approximation
+abs(sample_size_precision(needed_sample) - 0.05) < 1e-4
+
